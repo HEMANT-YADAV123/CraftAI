@@ -1778,6 +1778,16 @@
     }
   }
 
+  .mobile-menu-btn {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-btn {
+    display: none;
+  }
+}
+
   .disabled\:pointer-events-none:disabled {
     pointer-events: none;
   }

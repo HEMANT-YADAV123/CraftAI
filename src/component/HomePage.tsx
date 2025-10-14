@@ -91,12 +91,12 @@ export function HomePage({ onNavigateToDemo }: HomePageProps) {
                 <Button 
                   size="lg"
                   onClick={onNavigateToDemo}
-                  className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg px-8"
+                  className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg px-8 cursor-pointer"
                 >
                   Try Live Demo
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
-                <Button size="lg" variant="outline" className="text-lg px-8 border-primary/20 hover:border-primary">
+                <Button size="lg" variant="outline" className="text-lg px-8 border-primary/20 hover:border-primary cursor-pointer">
                   Schedule a Call
                 </Button>
               </div>
