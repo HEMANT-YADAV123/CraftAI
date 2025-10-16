@@ -49,6 +49,7 @@ export function Footer({ onNavigate }: FooterProps) {
                 <button
                   key={link.page}
                   onClick={() => handleNavigation(link.page)}
+                  aria-label={`Navigate to ${link.label} page`}
                   className="
                     relative text-muted-foreground text-left
                     transition-all duration-300 ease-in-out
@@ -73,6 +74,7 @@ export function Footer({ onNavigate }: FooterProps) {
             <div className="flex flex-col space-y-3 text-md">
               <button
                 onClick={() => handleNavigation("home")}
+                aria-label="Navigate to Impact page"
                 className="
                   relative text-muted-foreground text-left
                   transition-all duration-300 ease-in-out

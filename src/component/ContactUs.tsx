@@ -6,6 +6,8 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { motion } from "motion/react";
 import { ChevronDown } from "lucide-react";
+import { usePageMeta } from "../hooks/usePageMeta";
+import { useBreadcrumbSchema } from "../hooks/useBreadcrumbSchema";
 import { Footer } from "./Footer";
 
 interface ContactUsProps {
@@ -41,6 +43,20 @@ const countries = [
 ];
 
 export function ContactUs({ onNavigate }: ContactUsProps) {
+  // SEO meta tags for contact us page
+  usePageMeta({
+    title: "Contact Us - CraftAI | Talk to Our Sales Team",
+    description: "Get in touch with CraftAI's sales team. Have questions about pricing, plans, or our Voice AI platform? Fill out our contact form and we'll be in touch shortly to help transform your lending operations.",
+    keywords: "contact CraftAI, voice AI sales, lending AI pricing, debt collection software contact, talk to sales, CraftAI support",
+    canonicalUrl: "https://app.craftai.tech/contact"
+  });
+
+  // Breadcrumb structured data for SEO
+  useBreadcrumbSchema([
+    { name: "Home", url: "https://app.craftai.tech/" },
+    { name: "Contact Us", url: "https://app.craftai.tech/contact" }
+  ]);
+
   const [formData, setFormData] = useState({
     name: "",
     countryCode: "IN",
@@ -180,6 +196,9 @@ export function ContactUs({ onNavigate }: ContactUsProps) {
                         <button
                           type="button"
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                          aria-label={`Select country code, currently ${formData.countryCode}`}
+                          aria-expanded={isDropdownOpen}
+                          aria-haspopup="listbox"
                           className="w-24 h-12 px-3 bg-input-background border border-input rounded-md flex items-center justify-between hover:bg-input-background/80 transition-all duration-200 focus:ring-2 focus:ring-primary focus:outline-none"
                         >
                           <span className="font-medium text-sm">
@@ -230,6 +249,9 @@ export function ContactUs({ onNavigate }: ContactUsProps) {
                                     onClick={() =>
                                       handleCountrySelect(country.code)
                                     }
+                                    aria-label={`Select ${country.name} (${country.code})`}
+                                    role="option"
+                                    aria-selected={formData.countryCode === country.code}
                                     className={`w-full text-left px-4 py-3 text-sm hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors duration-200 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 last:border-b-0 ${
                                       formData.countryCode === country.code
                                         ? 'bg-primary/10 dark:bg-primary/20 text-primary font-medium'

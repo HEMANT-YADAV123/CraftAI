@@ -1,0 +1,82 @@
+# =============================================================================
+# CraftAI - Docker Compose Configuration
+# Supports both development and production environments
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------------------------
+  # Development Service - Hot Reload Enabled
+  # ---------------------------------------------------------------------------
+  craftai-dev:
+    container_name: craftai-dev
+    image: node:20-alpine
+    working_dir: /app
+    command: npm run dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules  # Anonymous volume for node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_BOLNA_API_KEY=${VITE_BOLNA_API_KEY}
+      - VITE_BOLNA_AGENT_PRIYA=${VITE_BOLNA_AGENT_PRIYA}
+      - VITE_BOLNA_AGENT_TRIPTI=${VITE_BOLNA_AGENT_TRIPTI}
+      - VITE_BOLNA_AGENT_ARUN=${VITE_BOLNA_AGENT_ARUN}
+    networks:
+      - craftai-network
+    stdin_open: true
+    tty: true
+
+  # ---------------------------------------------------------------------------
+  # Production Service - Optimized Build with Nginx
+  # ---------------------------------------------------------------------------
+  craftai-prod:
+    container_name: craftai-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: craftai:latest
+    ports:
+      - "8080:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_BOLNA_API_KEY=${VITE_BOLNA_API_KEY}
+      - VITE_BOLNA_AGENT_PRIYA=${VITE_BOLNA_AGENT_PRIYA}
+      - VITE_BOLNA_AGENT_TRIPTI=${VITE_BOLNA_AGENT_TRIPTI}
+      - VITE_BOLNA_AGENT_ARUN=${VITE_BOLNA_AGENT_ARUN}
+    networks:
+      - craftai-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  craftai-network:
+    driver: bridge
+
+# =============================================================================
+# Usage:
+#
+# Development Mode (with hot reload):
+#   docker-compose up craftai-dev
+#
+# Production Mode (optimized build):
+#   docker-compose up craftai-prod
+#
+# Build and run production:
+#   docker-compose up --build craftai-prod
+#
+# Stop all services:
+#   docker-compose down
+#
+# View logs:
+#   docker-compose logs -f craftai-prod
+# =============================================================================

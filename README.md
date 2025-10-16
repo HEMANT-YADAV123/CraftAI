@@ -11,7 +11,7 @@
 [![Vite](https://img.shields.io/badge/Vite-7.1.7-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-[Live Demo](#demo-feature) • [Features](#features) • [Getting Started](#getting-started) • [Documentation](#documentation)
+[Features](#features) • [Getting Started](#getting-started) • [Pages](#new-pages--components) • [Documentation](#component-overview)
 
 </div>
 
@@ -54,6 +54,13 @@ Meet our specialized AI agents designed for different lending scenarios:
 - **Omnichannel Outreach** - Coordinated strategy across voice, WhatsApp, SMS, RCS, and email
 - **Smart Prioritization** - AI scoring to focus on high-value accounts
 - **Compliance Automation** - Built-in regulatory compliance
+
+### 📱 User Experience
+
+- **Fully Responsive Design** - Optimized for desktop, tablet, and mobile devices
+- **Mobile-First Navigation** - Hamburger menu with smooth animations and touch-optimized controls
+- **Interactive Forms** - Contact form with searchable country selector and real-time validation
+- **Modern UI/UX** - Framer Motion animations, gradient effects, and polished interactions
 
 ---
 
@@ -102,15 +109,19 @@ CraftAI/
 │   │   │   ├── card.tsx
 │   │   │   ├── input.tsx
 │   │   │   ├── label.tsx
+│   │   │   ├── textarea.tsx
 │   │   │   └── ... (accordion, dialog, dropdown, etc.)
 │   │   │
 │   │   ├── AnalyticsAnimation.tsx  # Real-time metrics visualization
 │   │   ├── CallPulse.tsx           # Call status animation
 │   │   ├── DemoPage.tsx            # Live demo interface
 │   │   ├── HomePage.tsx            # Landing page
-│   │   └── Navigation.tsx          # Main navigation
+│   │   ├── AboutUs.tsx             # About us page with team info
+│   │   ├── ContactUs.tsx           # Contact form page
+│   │   ├── Footer.tsx              # Reusable footer component
+│   │   └── Navigation.tsx          # Responsive navigation with mobile menu
 │   │
-│   ├── App.tsx              # Root component with routing
+│   ├── App.tsx              # Root component with routing (Home, Demo, About, Contact)
 │   ├── App.css              # Application styles
 │   ├── main.tsx             # Application entry point
 │   └── index.css            # Global styles & Tailwind imports
@@ -127,7 +138,10 @@ CraftAI/
 #### Pages
 - **HomePage** - Marketing landing page with features, benefits, and client testimonials
 - **DemoPage** - Interactive demo with agent selection and live call initiation
-- **Navigation** - Responsive navigation bar with page routing
+- **AboutUs** - Team introduction page showcasing company founders and their expertise
+- **ContactUs** - Contact form with phone number, email, and inquiry submission
+- **Navigation** - Responsive navigation bar with mobile menu and page routing
+- **Footer** - Site-wide footer with company information, links, and social media
 
 #### Animations
 - **AnalyticsAnimation** - Animated bar chart showing Promise to Pay, Risk Indicators, Intent to Pay, and Ability to Pay
@@ -135,7 +149,7 @@ CraftAI/
 
 #### UI Components
 Built with **shadcn/ui** for consistency and accessibility:
-- Forms: Button, Input, Label, Checkbox, Radio, Select, Switch
+- Forms: Button, Input, Label, Textarea, Checkbox, Radio, Select, Switch
 - Layout: Card, Dialog, Sheet, Tabs, Accordion
 - Feedback: Alert, Toast (Sonner), Progress, Skeleton
 - Navigation: Navigation Menu, Dropdown Menu, Context Menu
@@ -280,11 +294,19 @@ Call queued → Connection established → Call in progress → Call ended
 #### Navigation Component
 [src/component/Navigation.tsx](src/component/Navigation.tsx)
 
-Responsive navigation bar with:
+Fully responsive navigation bar with:
 - Logo and branding
-- Page navigation (Home, Demo, About, Contact)
-- Call-to-action buttons
-- Mobile-responsive design
+- Page navigation (Home, Demo, About Us, Contact Us)
+- Sign In and Book a Demo CTA buttons
+- **Mobile hamburger menu** - Collapsible side menu with smooth transitions
+- Active page highlighting with underline animation
+- External link to app.craftai.tech for sign-in
+
+**Mobile Features:**
+- Hamburger icon toggles mobile menu
+- Full-screen mobile navigation overlay
+- Touch-optimized buttons and spacing
+- Smooth open/close animations
 
 ### Animation Components
 
@@ -307,6 +329,94 @@ Visual representation of an active call with:
 - Pulsing phone icon
 - Glow effects
 - Smooth transitions
+
+### New Pages & Components
+
+#### AboutUs Component
+[src/component/AboutUs.tsx](src/component/AboutUs.tsx)
+
+Company and team introduction page featuring:
+- **Company Mission** - "At Craft AI" section explaining the vision and purpose
+- **Who We Are** - Team expertise and background description
+- **Meet The Team** - Three co-founder profiles with:
+  - Profile images with gradient placeholders showing initials
+  - Name, role, and detailed bio for each founder
+  - LinkedIn profile links with hover effects
+  - Staggered fade-in animations on scroll
+
+**Team Members:**
+- **Shobhita Agarwal** - Co-Founder & CEO (13+ years experience, ex-Amazon, Samsung)
+- **Abhinav Garg** - Co-Founder & COO (4+ years, ex-PhonePe Alumni)
+- **Sayandeep Sarkar** - Co-Founder & CTO (7+ years, ex-Skycap Head of Engineering)
+
+**Design Features:**
+- Framer Motion scroll animations
+- Responsive grid layout (1 column mobile, 2-3 columns desktop)
+- Gradient backgrounds and hover effects on cards
+- Integrated footer component
+
+#### ContactUs Component
+[src/component/ContactUs.tsx](src/component/ContactUs.tsx)
+
+Professional contact form with dual-pane layout:
+
+**Left Pane:**
+- Heading: "Talk to a sales representative"
+- Descriptive text about pricing and product inquiries
+- Gradient background
+
+**Right Pane - Contact Form:**
+- **Name field** - Required text input
+- **Phone number field** - Country code dropdown + phone input
+  - Searchable country selector (25+ countries)
+  - Custom dropdown with flags and country codes
+  - Smooth animations and transitions
+- **Email field** - Required email input with validation
+- **Description field** - Multi-line textarea for inquiry details
+- **Submit button** - Gradient button with loading and success states
+
+**Features:**
+- Form validation for required fields
+- Simulated form submission (1.5s delay)
+- Success message display after submission
+- Auto-reset form after 3 seconds
+- Custom scrollbar styling for country dropdown
+- Click-outside-to-close dropdown functionality
+- Responsive layout (stacked on mobile, side-by-side on desktop)
+
+**Countries Supported:**
+India, US, UK, Australia, Canada, Germany, France, Japan, China, Brazil, Mexico, Singapore, UAE, New Zealand, South Africa, and 10+ more European countries.
+
+#### Footer Component
+[src/component/Footer.tsx](src/component/Footer.tsx)
+
+Site-wide footer with three-column layout:
+
+**Left Column - Company Info:**
+- Copyright © 2025
+- Company name: Novura Labs Private Limited
+- Address: Kokarya Business Center, Jayanagar, Bengaluru - 560041
+- ISO certification info (9001:27001)
+- LinkedIn social link with hover animation
+
+**Middle Column - Company Links:**
+- About (navigates to About Us page)
+- Contact (navigates to Contact Us page)
+- Hover effects with underline animation
+
+**Right Column - Features Links:**
+- Impact (navigates to Home page)
+- Hover effects with translate and underline animations
+
+**Bottom Section:**
+- "Made in India 2025" tagline
+- Border separator
+
+**Design:**
+- Fully responsive (stacks on mobile)
+- Consistent hover animations
+- Smooth transitions on all interactive elements
+- Integrated with page navigation system
 
 ---
 
@@ -391,6 +501,30 @@ export function Component({ prop1, prop2 = 0 }: ComponentProps) {
 - **Files**: PascalCase for components (e.g., `HomePage.tsx`)
 - **Functions**: camelCase (e.g., `makeCall`, `formatDuration`)
 - **Constants**: UPPER_SNAKE_CASE (e.g., `API_BASE_URL`)
+
+### Custom Styling
+
+**App.css** includes custom scrollbar styles for the country dropdown:
+
+```css
+/* Custom scrollbar for dropdown */
+.country-dropdown-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.country-dropdown-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Dark mode support */
+.dark .country-dropdown-scroll {
+  scrollbar-color: #64748b #1e293b;
+}
+```
+
+This provides a polished, consistent scrollbar experience across browsers for the contact form's country selector dropdown.
 
 ---
 

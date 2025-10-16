@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Input } from "./ui/input";
@@ -6,15 +6,36 @@ import { Label } from "./ui/label";
 import { CallPulse } from "./CallPulse";
 import { motion } from "motion/react";
 import { Phone, CheckCircle2, ArrowLeft, Zap, Brain, Target, AlertCircle } from "lucide-react";
-import arunImage from "../assets/images/arun.png";
-import priyaImage from "../assets/images/priya.png";
-import triptiImage from "../assets/images/tripti.png";
+import { usePageMeta } from "../hooks/usePageMeta";
+import { useBreadcrumbSchema } from "../hooks/useBreadcrumbSchema";
+import { getEnv } from "../utils/env";
+import arunImage from "../assets/images/arun_headshotweb.webp";
+import priyaImage from "../assets/images/priya_headshotweb.webp";
+import triptiImage from "../assets/images/tripti_headshotweb.webp";
 
 interface DemoPageProps {
   onBack: () => void;
 }
 
 type AgentType = "priya" | "tripti" | "arun";
+
+// Bolna API status types - matching the actual API responses
+type BolnaCallStatus =
+  | "queued"
+  | "initiated"
+  | "ringing"
+  | "in-progress"
+  | "call-disconnected"
+  | "completed"
+  | "no-answer"
+  | "busy"
+  | "failed"
+  | "canceled"
+  | "balance-low"
+  | "stopped"
+  | "error";
+
+// UI-facing call status
 type CallStatus = "idle" | "calling" | "connected" | "ended" | "error";
 
 interface AgentConfig {
@@ -24,10 +45,23 @@ interface AgentConfig {
   image: string;
   accent: string;
   agentId: string;
-  fromPhone: string;
 }
 
 export function DemoPage({ onBack }: DemoPageProps) {
+  // SEO meta tags for demo page
+  usePageMeta({
+    title: "Live Demo - CraftAI Voice AI Platform | Try Our AI Agents",
+    description: "Experience CraftAI's intelligent Voice AI agents in action. Try our live demo with Priya (Lead Generation), Tripti (EMI Reminders), or Arun (Debt Collection). See how AI-powered voice calls transform lending operations.",
+    keywords: "voice AI demo, AI voice agent demo, debt collection demo, EMI reminder demo, lead generation AI, live voice AI demo",
+    canonicalUrl: "https://app.craftai.tech/demo"
+  });
+
+  // Breadcrumb structured data for SEO
+  useBreadcrumbSchema([
+    { name: "Home", url: "https://app.craftai.tech/" },
+    { name: "Demo", url: "https://app.craftai.tech/demo" }
+  ]);
+
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedAgent, setSelectedAgent] = useState<AgentType | null>(null);
   const [callStatus, setCallStatus] = useState<CallStatus>("idle");
@@ -35,6 +69,152 @@ export function DemoPage({ onBack }: DemoPageProps) {
   const [executionId, setExecutionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Refs for cleanup
+  const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Poll execution status from Bolna API
+  const pollExecutionStatus = async (execId: string): Promise<void> => {
+    try {
+      const apiToken = getEnv('VITE_BOLNA_API_KEY');
+      const response = await fetch(`https://api.bolna.ai/executions/${execId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${apiToken || "dummy-token"}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch execution status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const status = data.status as BolnaCallStatus;
+
+      // Map Bolna status to UI status
+      mapBolnaStatusToUIStatus(status, data);
+
+      // If call is in a terminal state, stop polling
+      if (isTerminalStatus(status)) {
+        stopPolling();
+      }
+    } catch (err) {
+      console.error("Error polling execution status:", err);
+    }
+  };
+
+  // Check if status is terminal (no more updates expected)
+  const isTerminalStatus = (status: BolnaCallStatus): boolean => {
+    return [
+      "completed",
+      "call-disconnected",
+      "no-answer",
+      "busy",
+      "failed",
+      "canceled",
+      "stopped",
+      "error"
+    ].includes(status);
+  };
+
+  // Map Bolna API status to UI call status
+  const mapBolnaStatusToUIStatus = (status: BolnaCallStatus, data?: { conversation_time?: number }) => {
+    switch (status) {
+      case "queued":
+      case "initiated":
+      case "ringing":
+        setCallStatus("calling");
+        break;
+
+      case "in-progress":
+        setCallStatus("connected");
+        // Start duration timer if not already started
+        if (!durationIntervalRef.current) {
+          durationIntervalRef.current = setInterval(() => {
+            setCallDuration((prev) => prev + 1);
+          }, 1000);
+        }
+        break;
+
+      case "call-disconnected":
+      case "completed":
+        setCallStatus("ended");
+        // Use conversation_time from API if available
+        if (data?.conversation_time) {
+          setCallDuration(Math.floor(data.conversation_time));
+        }
+        stopDurationTimer();
+        break;
+
+      case "no-answer":
+      case "busy":
+      case "balance-low":
+        setError(getStatusErrorMessage(status));
+        setCallStatus("error");
+        stopDurationTimer();
+        break;
+
+      case "failed":
+      case "canceled":
+      case "stopped":
+      case "error":
+        setError(getStatusErrorMessage(status));
+        setCallStatus("error");
+        stopDurationTimer();
+        break;
+    }
+  };
+
+  // Get user-friendly error messages for different statuses
+  const getStatusErrorMessage = (status: BolnaCallStatus): string => {
+    switch (status) {
+      case "no-answer":
+        return "No answer - The recipient did not pick up the call";
+      case "busy":
+        return "Line busy - The recipient is currently on another call";
+      case "balance-low":
+        return "Insufficient balance - Please contact support";
+      case "failed":
+        return "Call failed - Please try again";
+      case "canceled":
+        return "Call was canceled";
+      case "stopped":
+        return "Call was stopped";
+      case "error":
+        return "An error occurred during the call";
+      default:
+        return "Call could not be completed";
+    }
+  };
+
+  // Start polling for execution status
+  const startPolling = (execId: string) => {
+    // Poll immediately
+    pollExecutionStatus(execId);
+
+    // Then poll every 2 seconds
+    pollingIntervalRef.current = setInterval(() => {
+      pollExecutionStatus(execId);
+    }, 2000);
+  };
+
+  // Stop polling
+  const stopPolling = () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+  };
+
+  // Stop duration timer
+  const stopDurationTimer = () => {
+    if (durationIntervalRef.current) {
+      clearInterval(durationIntervalRef.current);
+      durationIntervalRef.current = null;
+    }
+  };
 
   // Dummy agent configuration with Bolna API credentials
   const agents: AgentConfig[] = [
@@ -44,8 +224,7 @@ export function DemoPage({ onBack }: DemoPageProps) {
       description: "Calls leads and asks questions to gauge interest",
       image: priyaImage,
       accent: "from-primary to-purple-600",
-      agentId: import.meta.env.VITE_BOLNA_AGENT_PRIYA || "priya-agent-uuid-001",
-      fromPhone: import.meta.env.VITE_BOLNA_FROM_PHONE || "+919876543007",
+      agentId: getEnv('VITE_BOLNA_AGENT_PRIYA') || "priya-agent-uuid-001",
     },
     {
       id: "tripti" as AgentType,
@@ -53,8 +232,7 @@ export function DemoPage({ onBack }: DemoPageProps) {
       description: "Reminds customers of their upcoming EMIs and educates them on the importance of paying on time",
       image: triptiImage,
       accent: "from-accent to-blue-600",
-      agentId: import.meta.env.VITE_BOLNA_AGENT_TRIPTI || "tripti-agent-uuid-002",
-      fromPhone: import.meta.env.VITE_BOLNA_FROM_PHONE || "+919876543008",
+      agentId: getEnv('VITE_BOLNA_AGENT_TRIPTI') || "tripti-agent-uuid-002",
     },
     {
       id: "arun" as AgentType,
@@ -62,8 +240,7 @@ export function DemoPage({ onBack }: DemoPageProps) {
       description: "Professional debt collector that negotiates with customers and pushes for payment post bounce",
       image: arunImage,
       accent: "from-purple-500 to-accent",
-      agentId: import.meta.env.VITE_BOLNA_AGENT_ARUN || "arun-agent-uuid-003",
-      fromPhone: import.meta.env.VITE_BOLNA_FROM_PHONE || "+919876543009",
+      agentId: getEnv('VITE_BOLNA_AGENT_ARUN') || "arun-agent-uuid-003",
     },
   ];
 
@@ -86,7 +263,6 @@ export function DemoPage({ onBack }: DemoPageProps) {
     const payload = {
       agent_id: selectedAgentConfig.agentId,
       recipient_phone_number: phoneNumber.replace(/\s+/g, ""), // Remove spaces
-      from_phone_number: selectedAgentConfig.fromPhone,
       user_data: {
         agent_name: selectedAgentConfig.name,
         call_type: selectedAgent,
@@ -96,11 +272,8 @@ export function DemoPage({ onBack }: DemoPageProps) {
     };
 
     try {
-      const apiToken = import.meta.env.VITE_BOLNA_API_KEY;
-      
-      console.log("📞 Initiating call with payload:", payload);
-      console.log("🔑 API Token present:", apiToken);
-      
+      const apiToken = getEnv('VITE_BOLNA_API_KEY');
+
       // Call Bolna API
       const response = await fetch("https://api.bolna.ai/call", {
         method: "POST",
@@ -111,44 +284,23 @@ export function DemoPage({ onBack }: DemoPageProps) {
         body: JSON.stringify(payload),
       });
 
-      console.log("📊 Response Status:", response.status);
-      console.log("📊 Response Headers:", response.headers);
-
       const data = await response.json();
-      console.log("📨 Response Data:", data);
 
       if (!response.ok) {
         const errorDetails = data?.error || data?.message || response.statusText || "Unknown error";
         throw new Error(`API Error (${response.status}): ${errorDetails}`);
       }
 
-      if (data.status === "queued" && data.execution_id) {
+      if (data.execution_id) {
         setExecutionId(data.execution_id);
-        console.log("✅ Call queued successfully. Execution ID:", data.execution_id);
-        
-        // Simulate connection after 2 seconds
-        setTimeout(() => {
-          setCallStatus("connected");
-          
-          // Start duration counter
-          const interval = setInterval(() => {
-            setCallDuration((prev) => {
-              if (prev >= 30) {
-                clearInterval(interval);
-                setCallStatus("ended");
-                return prev;
-              }
-              return prev + 1;
-            });
-          }, 1000);
-        }, 2000);
+
+        // Start polling for real-time status updates from Bolna API
+        startPolling(data.execution_id);
       } else {
         throw new Error(`Unexpected response format: ${JSON.stringify(data)}`);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to initiate call";
-      console.error("❌ Bolna API Error:", errorMessage);
-      console.error("❌ Full Error:", err);
       setError(errorMessage);
       setCallStatus("error");
     } finally {
@@ -156,7 +308,35 @@ export function DemoPage({ onBack }: DemoPageProps) {
     }
   };
 
+  const endCall = async () => {
+    // Stop polling and duration timer
+    stopPolling();
+    stopDurationTimer();
+
+    // Call Bolna API to stop the call if we have an execution ID
+    if (executionId) {
+      try {
+        const apiToken = getEnv('VITE_BOLNA_API_KEY');
+        await fetch(`https://api.bolna.ai/call/${executionId}/stop`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiToken || "dummy-token"}`,
+            "Content-Type": "application/json",
+          },
+        });
+      } catch {
+        // Silently fail - the UI will still show call as ended
+      }
+    }
+
+    setCallStatus("ended");
+  };
+
   const resetCall = () => {
+    // Stop polling and duration timer
+    stopPolling();
+    stopDurationTimer();
+
     setCallStatus("idle");
     setCallDuration(0);
     setPhoneNumber("");
@@ -164,6 +344,14 @@ export function DemoPage({ onBack }: DemoPageProps) {
     setExecutionId(null);
     setError(null);
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopPolling();
+      stopDurationTimer();
+    };
+  }, []);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -177,7 +365,7 @@ export function DemoPage({ onBack }: DemoPageProps) {
         <Button
           variant="ghost"
           onClick={onBack}
-          className="mb-8 hover:bg-primary/10"
+          className="mb-8 text-foreground hover:bg-primary/10 hover:text-foreground"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Home
@@ -252,6 +440,8 @@ export function DemoPage({ onBack }: DemoPageProps) {
                         key={agent.id}
                         onClick={() => setSelectedAgent(agent.id)}
                         disabled={isLoading}
+                        aria-label={`Select ${agent.name} - ${agent.description}`}
+                        aria-pressed={selectedAgent === agent.id}
                         className={`p-4 rounded-xl border-2 transition-all text-left flex flex-col items-center ${
                           selectedAgent === agent.id
                             ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
@@ -259,10 +449,10 @@ export function DemoPage({ onBack }: DemoPageProps) {
                         } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
                         <div className="mb-3 flex items-center justify-center h-16 w-16">
-                          <img 
-                            src={agent.image} 
-                            alt={agent.name}
-                            className="w-16 h-16 rounded-full object-cover"
+                          <img
+                            src={agent.image}
+                            alt={`${agent.name} - CraftAI Voice AI Agent for ${agent.description}`}
+                            className="w-16 h-16 rounded-full object-fit"
                           />
                         </div>
                         <h4 className="mb-1 text-center w-full">{agent.name}</h4>
@@ -353,7 +543,7 @@ export function DemoPage({ onBack }: DemoPageProps) {
                         {[0, 1, 2].map((i) => (
                           <motion.div
                             key={i}
-                            animate={{ 
+                            animate={{
                               scale: [1, 1.2, 1],
                               opacity: [0.3, 1, 0.3]
                             }}
@@ -370,6 +560,22 @@ export function DemoPage({ onBack }: DemoPageProps) {
                       <span className="text-sm text-muted-foreground">Establishing connection</span>
                     </motion.div>
                   )}
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="mt-8"
+                  >
+                    <Button
+                      size="lg"
+                      variant="destructive"
+                      onClick={endCall}
+                      className="w-48 bg-red-600 hover:bg-red-700"
+                    >
+                      End Call
+                    </Button>
+                  </motion.div>
                 </motion.div>
               </div>
             </Card>

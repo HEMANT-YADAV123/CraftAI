@@ -17,6 +17,7 @@ export function Navigation({ currentPage = "home", onNavigate = (_page: string) 
         <button
           onClick={() => handleNavigate("home")}
           className="flex items-center"
+          aria-label="CraftAI Home - Navigate to homepage"
         >
            <img src={logo} alt="CraftAI" className="h-10 w-auto cursor-pointer" />
         </button>
@@ -107,6 +108,8 @@ export function Navigation({ currentPage = "home", onNavigate = (_page: string) 
         <button
   onClick={() => setIsMenuOpen(!isMenuOpen)}
   className="p-2 hover:bg-primary/10 rounded-lg transition-all duration-200 mobile-menu-btn"
+  aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+  aria-expanded={isMenuOpen}
 >
           {isMenuOpen ? (
             <X className="w-6 h-6 text-foreground cursor-pointer" />

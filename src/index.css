@@ -1023,8 +1023,8 @@
 
   @supports (color: color-mix(in lab, red, red)) {
     .bg-primary\/10 {
-      background-color: color-mix(in oklab, var(--primary) 10%, transparent);
-    }
+  background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+}
   }
 
   .bg-red-50 {
@@ -2019,7 +2019,7 @@
   --secondary: #e9d5ff;
   --secondary-foreground: #6b21a8;
   --muted: #f3e8ff;
-  --muted-foreground: #71717a;
+  --muted-foreground: #52525b;
   --accent: #3b82f6;
   --accent-foreground: #fff;
   --destructive: #d4183d;

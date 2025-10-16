@@ -1,0 +1,21 @@
+{
+  "name": "CraftAI - Voice AI Platform for Lenders",
+  "short_name": "CraftAI",
+  "description": "Transform your lending operations with intelligent Voice AI agents. Automate debt collection, EMI reminders, and lead generation with 70% cost reduction.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait-primary",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

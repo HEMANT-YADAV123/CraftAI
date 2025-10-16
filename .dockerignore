@@ -1,0 +1,82 @@
+# =============================================================================
+# .dockerignore - Exclude files from Docker build context
+# =============================================================================
+
+# Node modules (will be installed fresh in container)
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Build outputs (will be built in container)
+dist/
+dist-ssr/
+build/
+.vite/
+
+# Environment files (use .env.example as template)
+.env
+.env.local
+.env.*.local
+.env.example
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Documentation (keep only essential docs)
+README.md
+README-DOCKER.md
+CLAUDE.md
+*.md
+!package.json
+
+# Docker files (don't need these inside the container)
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
+
+# Lock files (KEEP package-lock.json for npm ci to work!)
+# package-lock.json - DO NOT EXCLUDE - needed for npm ci
+yarn.lock
+pnpm-lock.yaml

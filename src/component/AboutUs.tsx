@@ -1,6 +1,8 @@
 import { Card } from "./ui/card";
 import { motion } from "motion/react";
 import { Linkedin } from "lucide-react";
+import { usePageMeta } from "../hooks/usePageMeta";
+import { useBreadcrumbSchema } from "../hooks/useBreadcrumbSchema";
 import { Footer } from "./Footer";
 
 interface AboutUsProps {
@@ -8,25 +10,38 @@ interface AboutUsProps {
 }
 
 export function AboutUs({ onNavigate }: AboutUsProps) {
+  // SEO meta tags for about us page
+  usePageMeta({
+    title: "About Us - CraftAI | Meet Our Team of AI & Fintech Experts",
+    description: "Meet the team behind CraftAI. Our founders bring 20+ years of combined experience from Amazon, Samsung, PhonePe, and Skycap. Learn about our mission to transform lending operations with Voice AI technology.",
+    keywords: "CraftAI team, fintech founders, AI startup, voice AI company, lending technology team, Shobhita Agarwal, Abhinav Garg, Sayandeep Sarkar",
+    canonicalUrl: "https://app.craftai.tech/about"
+  });
+
+  // Breadcrumb structured data for SEO
+  useBreadcrumbSchema([
+    { name: "Home", url: "https://app.craftai.tech/" },
+    { name: "About Us", url: "https://app.craftai.tech/about" }
+  ]);
   const teamMembers = [
     {
       name: "Shobhita Agarwal",
       role: "Co-Founder & CEO",
-      image: "/src/assets/images/shobhita.jpg",
+      image: new URL("../assets/images/Shobita.webp", import.meta.url).href,
       bio: "She brings over 13 years of experience in technology, having previously served as Head of Engineering at a US-based collections startup. With professional stints at Amazon and Samsung, she combines global exposure with deep expertise in Indian lending and international collections best practices.",
       linkedin: "https://www.linkedin.com/in/shobhitaagarwal/"
     },
     {
       name: "Abhinav Garg",
       role: "Co-Founder & COO",
-      image: "/src/assets/images/abhinav.jpg",
+      image: new URL("../assets/images/Abhinav.webp", import.meta.url).href,
       bio: "With 4 years of experience in technology, he previously led product and operations at PhonePe Alumni. he brings strong expertise in building AI-driven products, combining technical knowledge with hands-on product leadership.",
       linkedin: "https://www.linkedin.com/in/abhinavgarg01/"
     },
     {
       name: "Sayandeep Sarkar",
       role: "Co-Founder & CTO",
-      image: "/src/assets/images/sayandeep.jpg",
+      image: new URL("../assets/images/Sayandip.webp", import.meta.url).href,
       bio: "He has 7 years of experience in technology, having previously served as Head of Engineering at Skycap, where he led engineering initiatives across collections and healthcare. His core expertise lies in AI and data engineering, with a strong focus on building scalable, impactful solutions.",
       linkedin: "https://www.linkedin.com/in/sandy247/"
     }
@@ -99,10 +114,15 @@ export function AboutUs({ onNavigate }: AboutUsProps) {
                 <Card className="p-8 border-border hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/5">
                   {/* Profile Image */}
                   <div className="mb-6 flex justify-center">
-                    <div className="w-48 h-48 rounded-full overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                      <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-6xl text-primary">
-                        {member.name.split(' ').map(n => n[0]).join('')}
-                      </div>
+                    <div className="w-48 h-48 rounded-full overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10">
+                      <img
+                        src={member.image}
+                        alt={`${member.name}, ${member.role} at CraftAI`}
+                        width="192"
+                        height="192"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     </div>
                   </div>
 

@@ -2,16 +2,18 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { AnalyticsAnimation } from "./AnalyticsAnimation";
 import { motion } from "motion/react";
-import { 
-  Phone, 
-  Zap, 
-  Shield, 
-  BarChart, 
-  TrendingUp, 
+import {
+  Phone,
+  Zap,
+  Shield,
+  BarChart,
+  TrendingUp,
   CheckCircle2,
   ArrowRight,
   Target
 } from "lucide-react";
+import { usePageMeta } from "../hooks/usePageMeta";
+import { useBreadcrumbSchema } from "../hooks/useBreadcrumbSchema";
 import shubhamLogo from "../assets/images/shubham.png";
 import heroHousingLogo from "../assets/images/heroHousing.png";
 import srgHousingLogo from "../assets/images/srgHousing.png";
@@ -21,6 +23,18 @@ interface HomePageProps {
 }
 
 export function HomePage({ onNavigateToDemo }: HomePageProps) {
+  // SEO meta tags for homepage
+  usePageMeta({
+    title: "CraftAI - Voice AI Platform for Lenders | Debt Collection & Lead Generation",
+    description: "Transform your lending operations with CraftAI's intelligent Voice AI agents. Automate debt collection, EMI reminders, and lead generation with 70% cost reduction and 3x higher on-time payments. 100% FDCPA & TCPA compliant.",
+    keywords: "voice AI, lending platform, debt collection AI, EMI reminders, lead generation, AI voice agents, FDCPA compliant, TCPA compliant, collection automation, lending technology",
+    canonicalUrl: "https://app.craftai.tech/"
+  });
+
+  // Breadcrumb structured data for SEO
+  useBreadcrumbSchema([
+    { name: "Home", url: "https://app.craftai.tech/" }
+  ]);
   const features = [
     {
       icon: Phone,
@@ -264,7 +278,14 @@ export function HomePage({ onNavigateToDemo }: HomePageProps) {
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
               >
-                <img src={shubhamLogo} alt="Shubham" className="h-16 md:h-20 w-auto object-contain" />
+                <img
+                  src={shubhamLogo}
+                  alt="Shubham Housing Finance - CraftAI Partner"
+                  width="200"
+                  height="80"
+                  loading="lazy"
+                  className="h-16 md:h-20 w-auto object-contain"
+                />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -272,7 +293,14 @@ export function HomePage({ onNavigateToDemo }: HomePageProps) {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 viewport={{ once: true }}
               >
-                <img src={heroHousingLogo} alt="Hero Housing Finance" className="h-16 md:h-20 w-auto object-contain" />
+                <img
+                  src={heroHousingLogo}
+                  alt="Hero Housing Finance - CraftAI Partner"
+                  width="200"
+                  height="80"
+                  loading="lazy"
+                  className="h-16 md:h-20 w-auto object-contain"
+                />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -280,7 +308,14 @@ export function HomePage({ onNavigateToDemo }: HomePageProps) {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                <img src={srgHousingLogo} alt="SRG Housing Finance Limited" className="h-16 md:h-20 w-auto object-contain" />
+                <img
+                  src={srgHousingLogo}
+                  alt="SRG Housing Finance Limited - CraftAI Partner"
+                  width="200"
+                  height="80"
+                  loading="lazy"
+                  className="h-16 md:h-20 w-auto object-contain"
+                />
               </motion.div>
             </div>
           </div>
