@@ -9,6 +9,7 @@ import { ChevronDown } from "lucide-react";
 import { usePageMeta } from "../hooks/usePageMeta";
 import { useBreadcrumbSchema } from "../hooks/useBreadcrumbSchema";
 import { Footer } from "./Footer";
+import { sendContactEmail } from "../services/emailService";
 
 interface ContactUsProps {
   onNavigate: (page: string) => void;
@@ -67,6 +68,7 @@ export function ContactUs({ onNavigate }: ContactUsProps) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -104,23 +106,39 @@ export function ContactUs({ onNavigate }: ContactUsProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError("");
+    setSubmitSuccess(false);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Send email using EmailJS
+      const response = await sendContactEmail(formData);
 
-    console.log("Form submitted:", formData);
-    setSubmitSuccess(true);
-    setIsSubmitting(false);
+      if (response.success) {
+        setSubmitSuccess(true);
 
-    setTimeout(() => {
-      setFormData({
-        name: "",
-        countryCode: "IN",
-        phoneNumber: "",
-        email: "",
-        description: "",
-      });
-      setSubmitSuccess(false);
-    }, 3000);
+        // Reset form after successful submission
+        setTimeout(() => {
+          setFormData({
+            name: "",
+            countryCode: "IN",
+            phoneNumber: "",
+            email: "",
+            description: "",
+          });
+          setSubmitSuccess(false);
+        }, 3000);
+      } else {
+        // Show error message from service
+        setSubmitError(response.message);
+      }
+    } catch (error) {
+      console.error("Unexpected error during form submission:", error);
+      setSubmitError(
+        "An unexpected error occurred. Please try again or contact support."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -340,6 +358,31 @@ export function ContactUs({ onNavigate }: ContactUsProps) {
                       className="mt-2 resize-none bg-input-background"
                     />
                   </div>
+
+                  {/* Success/Error Messages */}
+                  {submitSuccess && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+                    >
+                      <p className="text-green-800 dark:text-green-200 text-sm font-medium">
+                        ✓ Message sent successfully! We'll be in touch soon.
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {submitError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+                    >
+                      <p className="text-red-800 dark:text-red-200 text-sm font-medium">
+                        {submitError}
+                      </p>
+                    </motion.div>
+                  )}
 
                   {/* Submit Button */}
                   <Button

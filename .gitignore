@@ -13,7 +13,7 @@ build/
 # Environment variables
 .env
 .env.*.local
-.env.example
+# .env.example - KEEP THIS as template for users!
 
 # Logs
 logs
@@ -38,3 +38,10 @@ Thumbs.db
 
 # Temporary files
 *.local
+
+# Test and development files
+test-docker-env.sh
+test-env-access.html
+
+# Documentation duplicates
+README-DOCKER.md

@@ -570,6 +570,127 @@ const response = await fetch("https://api.bolna.ai/call", {
 
 ---
 
+## Build Instructions
+
+### Local Development Build
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server (http://localhost:5173)
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build locally
+npm run preview
+```
+
+### Docker Build
+
+#### Prerequisites
+- Docker Engine 20.10+
+- Docker Compose 2.0+
+
+#### Development Build (with hot reload)
+
+```bash
+# Start development container
+docker-compose up craftai-dev
+
+# Access at http://localhost:5173
+# Changes to source files will auto-reload
+```
+
+#### Production Build
+
+```bash
+# Build and start production container
+docker-compose up --build craftai-prod
+
+# Access at http://localhost:8080
+
+# Or build Docker image manually
+docker build -t craftai:latest .
+
+# Run production container
+docker run -d \
+  -p 8080:80 \
+  -e VITE_BOLNA_API_KEY=your_api_key \
+  -e VITE_BOLNA_AGENT_PRIYA=priya_uuid \
+  -e VITE_BOLNA_AGENT_TRIPTI=tripti_uuid \
+  -e VITE_BOLNA_AGENT_ARUN=arun_uuid \
+  -e VITE_EMAILJS_SERVICE_ID=your_service_id \
+  -e VITE_EMAILJS_TEMPLATE_ID=your_template_id \
+  -e VITE_EMAILJS_PUBLIC_KEY=your_public_key \
+  --name craftai-prod \
+  craftai:latest
+```
+
+#### Docker Build Details
+
+The Dockerfile uses a **multi-stage build** for optimal production images:
+
+1. **Stage 1 - Builder** (`node:20-alpine`):
+   - Installs all dependencies (including devDependencies)
+   - Runs TypeScript compilation and Vite build
+   - Outputs optimized static files to `dist/`
+
+2. **Stage 2 - Production** (`nginx:alpine`):
+   - Copies built assets from builder stage
+   - Serves static files with Nginx
+   - Injects runtime environment variables via entrypoint script
+   - Final image size: ~50MB (vs ~1GB+ with Node)
+
+#### Environment Variables for Docker
+
+Create a `.env` file in the project root for Docker Compose:
+
+```env
+# Bolna API Configuration
+VITE_BOLNA_API_KEY=your_api_key_here
+VITE_BOLNA_AGENT_PRIYA=priya_uuid
+VITE_BOLNA_AGENT_TRIPTI=tripti_uuid
+VITE_BOLNA_AGENT_ARUN=arun_uuid
+
+# EmailJS Configuration
+VITE_EMAILJS_SERVICE_ID=your_service_id
+VITE_EMAILJS_TEMPLATE_ID=your_template_id
+VITE_EMAILJS_PUBLIC_KEY=your_public_key
+```
+
+**Note**: You can use the `.env.example` file as a template:
+```bash
+cp .env.example .env
+# Edit .env with your actual API keys
+```
+
+#### Docker Commands Reference
+
+```bash
+# View logs
+docker-compose logs -f craftai-prod
+
+# Stop containers
+docker-compose down
+
+# Rebuild and restart
+docker-compose up --build craftai-prod
+
+# Remove all containers and volumes
+docker-compose down -v
+
+# Access container shell
+docker exec -it craftai-prod sh
+
+# Check container health
+docker ps --filter name=craftai-prod
+```
+
+---
+
 ## Deployment
 
 ### Build for Production

@@ -50,6 +50,7 @@ COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 # Set permissions for nginx user (already exists in nginx:alpine)
+# Note: Entrypoint runs as root to create config.js, then nginx runs as nginx user
 RUN chown -R nginx:nginx /usr/share/nginx/html \
     && chown -R nginx:nginx /var/cache/nginx \
     && chown -R nginx:nginx /var/log/nginx \
@@ -57,8 +58,8 @@ RUN chown -R nginx:nginx /usr/share/nginx/html \
     && touch /var/run/nginx.pid \
     && chown -R nginx:nginx /var/run/nginx.pid
 
-# Switch to non-root user
-USER nginx
+# Don't switch to nginx user here - entrypoint needs root to create config.js
+# Nginx will run as nginx user via its own configuration
 
 # Expose port 80
 EXPOSE 80

@@ -3,8 +3,6 @@
 # Supports both development and production environments
 # =============================================================================
 
-version: '3.8'
-
 services:
   # ---------------------------------------------------------------------------
   # Development Service - Hot Reload Enabled
@@ -25,6 +23,9 @@ services:
       - VITE_BOLNA_AGENT_PRIYA=${VITE_BOLNA_AGENT_PRIYA}
       - VITE_BOLNA_AGENT_TRIPTI=${VITE_BOLNA_AGENT_TRIPTI}
       - VITE_BOLNA_AGENT_ARUN=${VITE_BOLNA_AGENT_ARUN}
+      - VITE_EMAILJS_SERVICE_ID=${VITE_EMAILJS_SERVICE_ID}
+      - VITE_EMAILJS_TEMPLATE_ID=${VITE_EMAILJS_TEMPLATE_ID}
+      - VITE_EMAILJS_PUBLIC_KEY=${VITE_EMAILJS_PUBLIC_KEY}
     networks:
       - craftai-network
     stdin_open: true
@@ -48,6 +49,9 @@ services:
       - VITE_BOLNA_AGENT_PRIYA=${VITE_BOLNA_AGENT_PRIYA}
       - VITE_BOLNA_AGENT_TRIPTI=${VITE_BOLNA_AGENT_TRIPTI}
       - VITE_BOLNA_AGENT_ARUN=${VITE_BOLNA_AGENT_ARUN}
+      - VITE_EMAILJS_SERVICE_ID=${VITE_EMAILJS_SERVICE_ID}
+      - VITE_EMAILJS_TEMPLATE_ID=${VITE_EMAILJS_TEMPLATE_ID}
+      - VITE_EMAILJS_PUBLIC_KEY=${VITE_EMAILJS_PUBLIC_KEY}
     networks:
       - craftai-network
     restart: unless-stopped
